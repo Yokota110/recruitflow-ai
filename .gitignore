@@ -5,6 +5,7 @@ dist
 .env
 .env.local
 *.log
-uploads/
+# Runtime upload storage (not source module)
+apps/api/uploads/
 .DS_Store
 coverage
