@@ -1,0 +1,4 @@
+{
+  "installCommand": "cd ../.. && pnpm install",
+  "buildCommand": "cd ../.. && pnpm --filter @recruitflow/shared build && pnpm --filter @recruitflow/api exec prisma generate && pnpm --filter @recruitflow/api build"
+}

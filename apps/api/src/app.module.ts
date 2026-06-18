@@ -12,6 +12,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CrmModule } from './crm/crm.module';
 import { WorkflowsModule } from './workflows/workflows.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -29,5 +30,6 @@ import { WorkflowsModule } from './workflows/workflows.module';
     CrmModule,
     WorkflowsModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
