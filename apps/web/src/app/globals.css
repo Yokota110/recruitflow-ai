@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+:root {
+  --background: #EFEBE3;
+  --foreground: #1A1814;
+  --surface: #FFFCF7;
+  --surface-muted: #F5F1EA;
+  --primary: #E8653A;
+  --primary-hover: #D4562E;
+  --primary-soft: #FDF0EB;
+  --secondary: #3DAA8D;
+  --secondary-soft: #EBF7F3;
+  --accent: #5B8DEF;
+  --accent-soft: #EDF3FD;
+  --muted: #6B6560;
+  --muted-light: #9C958A;
+  --border: #D9D3C7;
+  --border-light: #E8E2D9;
+  --sidebar: #0F1419;
+  --sidebar-hover: #1A2229;
+  --sidebar-text: #A8A29E;
+  --sidebar-active: #FFFCF7;
+  --success: #2D8A6E;
+  --warning: #C4A35A;
+  --danger: #C45C5C;
+  --shadow: 0 1px 3px rgba(15, 20, 25, 0.06), 0 4px 16px rgba(15, 20, 25, 0.04);
+  --shadow-lg: 0 8px 32px rgba(15, 20, 25, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-border: var(--border);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+* {
+  border-color: var(--border-light);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+/* Linen dot-grid background */
+.app-bg {
+  background-color: var(--background);
+  background-image: radial-gradient(circle, #D9D3C7 0.8px, transparent 0.8px);
+  background-size: 24px 24px;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-light);
+}
+
+/* Copper shimmer for active elements */
+.nav-active-glow {
+  box-shadow: inset 3px 0 0 var(--primary), 0 0 20px rgba(232, 101, 58, 0.08);
+}
+
+.stat-card-accent {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--accent-color, var(--primary));
+  border-radius: 3px 0 0 3px;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.4s ease-out forwards;
+}
+
+.pipeline-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pipeline-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.pipeline-scroll::-webkit-scrollbar-thumb {
+  background: var(--muted-light);
+  border-radius: 99px;
+}

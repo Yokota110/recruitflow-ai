@@ -1,0 +1,767 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  RECRUITER
+  HIRING_MANAGER
+  VIEWER
+}
+
+enum JobStatus {
+  DRAFT
+  OPEN
+  PAUSED
+  CLOSED
+  ARCHIVED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum LocationType {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+enum PipelineStage {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  FINAL_INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+}
+
+enum ApplicationStatus {
+  ACTIVE
+  REJECTED
+  WITHDRAWN
+  HIRED
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum CandidateSource {
+  LINKEDIN
+  INDEED
+  REFERRAL
+  CAREERS_PAGE
+  AGENCY
+  OTHER
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum HiringRecommendation {
+  STRONG_HIRE
+  HIRE
+  CONSIDER
+  HOLD
+  REJECT
+}
+
+enum NotificationType {
+  NEW_APPLICATION
+  INTERVIEW_SCHEDULED
+  STAGE_CHANGED
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+}
+
+enum TalentPoolStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum TimelineEventType {
+  RESUME_RECEIVED
+  NOTE_ADDED
+  INTERVIEW_SCHEDULED
+  AI_ANALYSIS
+  STAGE_CHANGED
+  EMAIL_SENT
+  TAG_ADDED
+  TASK_COMPLETED
+  OUTREACH
+  OFFER_SENT
+  CANDIDATE_ADDED
+}
+
+enum TaskType {
+  CALL_CANDIDATE
+  REVIEW_RESUME
+  SCHEDULE_INTERVIEW
+  SEND_OFFER
+  OTHER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum EmailTemplateType {
+  INITIAL_OUTREACH
+  INTERVIEW_INVITE
+  FOLLOW_UP
+  OFFER_LETTER
+  REJECTION
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+  CANCELLED
+}
+
+enum OutreachRecipientStatus {
+  PENDING
+  SENT
+  FAILED
+  BOUNCED
+}
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  DISABLED
+  ARCHIVED
+}
+
+enum WorkflowTriggerType {
+  CANDIDATE_CREATED
+  CANDIDATE_APPLIED
+  CANDIDATE_MOVED_STAGE
+  INTERVIEW_SCHEDULED
+  INTERVIEW_COMPLETED
+  OFFER_SENT
+  OFFER_ACCEPTED
+  OFFER_REJECTED
+  TASK_COMPLETED
+}
+
+enum WorkflowNodeType {
+  TRIGGER
+  CONDITION
+  ACTION
+}
+
+enum WorkflowConditionField {
+  MATCH_SCORE
+  LOCATION
+  EXPERIENCE
+  SKILL
+  JOB_TITLE
+  SOURCE
+  STAGE
+}
+
+enum WorkflowConditionOperator {
+  GT
+  GTE
+  LT
+  LTE
+  EQ
+  NEQ
+  CONTAINS
+}
+
+enum WorkflowActionType {
+  SEND_EMAIL
+  CREATE_TASK
+  MOVE_CANDIDATE
+  NOTIFY_RECRUITER
+  SCHEDULE_INTERVIEW
+  GENERATE_AI_ANALYSIS
+  ADD_TAG
+  ARCHIVE_CANDIDATE
+}
+
+enum WorkflowExecutionStatus {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+enum NotificationCategory {
+  WORKFLOW
+  INTERVIEW
+  CANDIDATE
+  OFFER
+  TASK
+  SYSTEM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members       OrganizationMember[]
+  jobs          Job[]
+  candidates    Candidate[]
+  notifications Notification[]
+  tags          Tag[]
+  emailTemplates EmailTemplate[]
+  outreachCampaigns OutreachCampaign[]
+  tasks         RecruiterTask[]
+  timelineEvents TimelineEvent[]
+  workflows     Workflow[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships      OrganizationMember[]
+  notes            CandidateNote[]
+  interviews       Interview[]                @relation("InterviewInterviewer")
+  managedJobs      Job[]                      @relation("HiringManager")
+  stageChanges     ApplicationStageHistory[]  @relation("StageChangedBy")
+  notifications    Notification[]
+  assignedTasks    RecruiterTask[]            @relation("TaskAssignee")
+  timelineEvents   TimelineEvent[]            @relation("TimelineActor")
+  outreachCampaigns OutreachCampaign[]        @relation("CampaignCreator")
+  workflows         Workflow[]                 @relation("WorkflowCreator")
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           UserRole @default(RECRUITER)
+  joinedAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+}
+
+model Job {
+  id              String         @id @default(cuid())
+  organizationId  String
+  title           String
+  department      String
+  location        String
+  locationType    LocationType   @default(HYBRID)
+  employmentType  EmploymentType @default(FULL_TIME)
+  status          JobStatus      @default(DRAFT)
+  description     String         @db.Text
+  requirements    String         @db.Text
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String?        @default("USD")
+  hiringManagerId String?
+  openedAt        DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  organization  Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  hiringManager User?         @relation("HiringManager", fields: [hiringManagerId], references: [id])
+  applications  Application[]
+  interviews    Interview[]
+
+  @@index([organizationId, status])
+}
+
+model Candidate {
+  id             String          @id @default(cuid())
+  organizationId String
+  firstName      String
+  lastName       String
+  email          String
+  phone          String?
+  location       String?
+  linkedinUrl    String?
+  source         CandidateSource @default(OTHER)
+  education      String?
+  yearsExperience Int?
+  avatarUrl      String?
+  poolStatus     TalentPoolStatus?
+  lastContactedAt DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  applications Application[]
+  skills       CandidateSkill[]
+  experiences  CandidateExperience[]
+  resumes      Resume[]
+  notes        CandidateNote[]
+  tags         CandidateTag[]
+  timelineEvents TimelineEvent[]
+  outreachRecipients OutreachRecipient[]
+  tasks        RecruiterTask[]
+  executions   WorkflowExecution[]
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+}
+
+model Resume {
+  id          String   @id @default(cuid())
+  candidateId String
+  fileName    String
+  fileUrl     String
+  fileSize    Int
+  mimeType    String
+  parsedText  String?  @db.Text
+  uploadedAt  DateTime @default(now())
+
+  candidate  Candidate    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  aiAnalyses AiAnalysis[]
+}
+
+model CandidateSkill {
+  id          String @id @default(cuid())
+  candidateId String
+  name        String
+  level       Int?
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, name])
+}
+
+model CandidateExperience {
+  id          String    @id @default(cuid())
+  candidateId String
+  company     String
+  title       String
+  startDate   DateTime
+  endDate     DateTime?
+  description String?   @db.Text
+  isCurrent   Boolean   @default(false)
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+}
+
+model Application {
+  id              String            @id @default(cuid())
+  jobId           String
+  candidateId     String
+  stage           PipelineStage     @default(APPLIED)
+  status          ApplicationStatus @default(ACTIVE)
+  matchScore      Int?
+  appliedAt       DateTime          @default(now())
+  stageChangedAt  DateTime          @default(now())
+  rejectedAt      DateTime?
+  hiredAt         DateTime?
+  rejectionReason String?
+
+  job              Job                       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidate        Candidate                 @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  stageHistory     ApplicationStageHistory[]
+  aiAnalyses       AiAnalysis[]
+  candidateInsight CandidateInsight?
+  interviews       Interview[]
+  offer            Offer?
+
+  @@unique([jobId, candidateId])
+  @@index([jobId, stage])
+  @@index([candidateId])
+}
+
+model ApplicationStageHistory {
+  id            String         @id @default(cuid())
+  applicationId String
+  fromStage     PipelineStage?
+  toStage       PipelineStage
+  changedById   String?
+  changedAt     DateTime       @default(now())
+  durationMs    Int?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  changedBy   User?       @relation("StageChangedBy", fields: [changedById], references: [id])
+
+  @@index([applicationId])
+  @@index([changedAt])
+}
+
+model CandidateNote {
+  id          String   @id @default(cuid())
+  candidateId String
+  authorId    String
+  content     String   @db.Text
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Interview {
+  id            String          @id @default(cuid())
+  applicationId String
+  jobId         String
+  interviewerId String
+  title         String
+  stage         PipelineStage   @default(INTERVIEW)
+  scheduledAt   DateTime
+  durationMin   Int             @default(60)
+  status        InterviewStatus @default(SCHEDULED)
+  meetingUrl    String?
+  location      String?
+  notes         String?         @db.Text
+  feedback      String?         @db.Text
+  rating        Int?
+  createdAt     DateTime        @default(now())
+
+  application      Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  job              Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  interviewer      User               @relation("InterviewInterviewer", fields: [interviewerId], references: [id])
+  interviewFeedback InterviewFeedback?
+
+  @@index([scheduledAt])
+  @@index([jobId])
+}
+
+model InterviewFeedback {
+  id               String   @id @default(cuid())
+  interviewId      String   @unique
+  communication    Int
+  technicalSkills  Int
+  cultureFit       Int
+  recommendation   Int
+  notes            String?  @db.Text
+  submittedAt      DateTime @default(now())
+
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+}
+
+model Offer {
+  id            String      @id @default(cuid())
+  applicationId String      @unique
+  salary        Int
+  currency      String      @default("USD")
+  startDate     DateTime?
+  sentAt        DateTime    @default(now())
+  expiresAt     DateTime?
+  acceptedAt    DateTime?
+  declinedAt    DateTime?
+  status        OfferStatus @default(PENDING)
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model CandidateInsight {
+  id                 String               @id @default(cuid())
+  applicationId      String               @unique
+  matchScore         Int
+  skillOverlapScore  Int
+  experienceScore    Int
+  educationScore     Int
+  seniorityScore     Int
+  skillsSummary      String               @db.Text
+  strengths          String[]
+  weaknesses         String[]
+  recommendation     HiringRecommendation
+  interviewQuestions String[]
+  provider           String               @default("intelligence-engine")
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model AiAnalysis {
+  id                 String   @id @default(cuid())
+  applicationId      String
+  resumeId           String?
+  matchScore         Int
+  skillsSummary      String   @db.Text
+  strengths          String[]
+  weaknesses         String[]
+  interviewQuestions String[]
+  rawResponse        Json?
+  provider           String   @default("mock")
+  createdAt          DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  resume      Resume?     @relation(fields: [resumeId], references: [id])
+}
+
+model Notification {
+  id             String           @id @default(cuid())
+  organizationId String
+  userId         String
+  type           NotificationType
+  category       NotificationCategory @default(SYSTEM)
+  priority       NotificationPriority @default(NORMAL)
+  title          String
+  message        String           @db.Text
+  read           Boolean          @default(false)
+  archived       Boolean          @default(false)
+  metadata       Json?
+  createdAt      DateTime         @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, archived])
+  @@index([organizationId, createdAt])
+  @@index([userId, category])
+}
+
+model Tag {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  color          String   @default("#E8653A")
+  createdAt      DateTime @default(now())
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  candidates   CandidateTag[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model CandidateTag {
+  id          String   @id @default(cuid())
+  candidateId String
+  tagId       String
+  createdAt   DateTime @default(now())
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, tagId])
+}
+
+model TimelineEvent {
+  id             String            @id @default(cuid())
+  organizationId String
+  candidateId    String
+  type           TimelineEventType
+  title          String
+  description    String?           @db.Text
+  metadata       Json?
+  actorId        String?
+  createdAt      DateTime          @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  candidate    Candidate    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  actor        User?        @relation("TimelineActor", fields: [actorId], references: [id])
+
+  @@index([candidateId, createdAt])
+  @@index([organizationId, createdAt])
+}
+
+model EmailTemplate {
+  id             String            @id @default(cuid())
+  organizationId String
+  name           String
+  subject        String
+  body           String            @db.Text
+  type           EmailTemplateType
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaigns    OutreachCampaign[]
+
+  @@index([organizationId])
+}
+
+model OutreachCampaign {
+  id             String         @id @default(cuid())
+  organizationId String
+  name           String
+  templateId     String
+  status         CampaignStatus @default(DRAFT)
+  sendDate       DateTime?
+  sentAt         DateTime?
+  createdById    String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template     EmailTemplate       @relation(fields: [templateId], references: [id])
+  createdBy    User                @relation("CampaignCreator", fields: [createdById], references: [id])
+  recipients   OutreachRecipient[]
+
+  @@index([organizationId, status])
+}
+
+model OutreachRecipient {
+  id          String                  @id @default(cuid())
+  campaignId  String
+  candidateId String
+  status      OutreachRecipientStatus @default(PENDING)
+  sentAt      DateTime?
+
+  campaign  OutreachCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  candidate Candidate        @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, candidateId])
+}
+
+model RecruiterTask {
+  id             String     @id @default(cuid())
+  organizationId String
+  assigneeId     String
+  candidateId    String?
+  title          String
+  type           TaskType   @default(OTHER)
+  status         TaskStatus @default(TODO)
+  description    String?    @db.Text
+  dueDate        DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignee     User         @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  candidate    Candidate?   @relation(fields: [candidateId], references: [id])
+
+  @@index([organizationId, assigneeId, status])
+  @@index([dueDate])
+}
+
+model Workflow {
+  id             String              @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?             @db.Text
+  status         WorkflowStatus      @default(DRAFT)
+  enabled        Boolean             @default(false)
+  triggerType    WorkflowTriggerType
+  createdById    String
+  viewport       Json?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User                  @relation("WorkflowCreator", fields: [createdById], references: [id])
+  nodes        WorkflowNode[]
+  edges        WorkflowEdge[]
+  executions   WorkflowExecution[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, enabled, triggerType])
+}
+
+model WorkflowNode {
+  id         String           @id @default(cuid())
+  workflowId String
+  nodeKey    String
+  type       WorkflowNodeType
+  label      String
+  positionX  Float            @default(0)
+  positionY  Float            @default(0)
+  config     Json             @default("{}")
+
+  workflow  Workflow           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  condition WorkflowCondition?
+  action    WorkflowAction?
+
+  @@unique([workflowId, nodeKey])
+}
+
+model WorkflowEdge {
+  id         String @id @default(cuid())
+  workflowId String
+  edgeKey    String
+  sourceKey  String
+  targetKey  String
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, edgeKey])
+}
+
+model WorkflowCondition {
+  id       String                    @id @default(cuid())
+  nodeId   String                    @unique
+  field    WorkflowConditionField
+  operator WorkflowConditionOperator
+  value    String
+
+  node WorkflowNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowAction {
+  id         String             @id @default(cuid())
+  nodeId     String             @unique
+  actionType WorkflowActionType
+  params     Json               @default("{}")
+
+  node WorkflowNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowExecution {
+  id             String                  @id @default(cuid())
+  organizationId String
+  workflowId     String
+  candidateId    String?
+  status         WorkflowExecutionStatus @default(PENDING)
+  startedAt      DateTime                @default(now())
+  completedAt    DateTime?
+  durationMs     Int?
+  result         Json?
+  errorMessage   String?                 @db.Text
+
+  workflow  Workflow   @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  candidate Candidate? @relation(fields: [candidateId], references: [id])
+
+  @@index([organizationId, startedAt])
+  @@index([workflowId, status])
+}
+
+model WorkflowTemplate {
+  id          String              @id @default(cuid())
+  slug        String              @unique
+  name        String
+  description String              @db.Text
+  triggerType WorkflowTriggerType
+  definition  Json
+  category    String              @default("general")
+  isBuiltIn   Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+}

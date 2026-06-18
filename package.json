@@ -1,0 +1,20 @@
+{
+  "name": "recruitflow-ai",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "db:generate": "pnpm --filter @recruitflow/api db:generate",
+    "db:migrate": "pnpm --filter @recruitflow/api db:migrate",
+    "db:seed": "pnpm --filter @recruitflow/api db:seed",
+    "db:studio": "pnpm --filter @recruitflow/api db:studio",
+    "screenshots": "node scripts/capture-screenshots.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.51.1",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
