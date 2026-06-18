@@ -127,13 +127,35 @@ erDiagram
 
 ## Screenshots
 
-> Run the app locally and capture screenshots for your portfolio. Key pages:
-> - `/` — Executive Dashboard V2
-> - `/candidates/[id]` — AI Intelligence panel with match gauge
-> - `/jobs/[id]` — Job metrics & pipeline trend
-> - `/pipeline` — Kanban with match color indicators
-> - `/interviews` — Calendar view & feedback forms
-> - `/analytics` — Executive analytics dashboards
+<p align="center">
+  <img src="docs/screenshots/01-dashboard.png" alt="Executive Dashboard" width="800" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/02-ai-intelligence.png" alt="AI Candidate Intelligence" width="390" />
+  <img src="docs/screenshots/04-pipeline.png" alt="Pipeline Kanban" width="390" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/03-job-details.png" alt="Job Metrics" width="390" />
+  <img src="docs/screenshots/06-analytics.png" alt="Recruiter Analytics" width="390" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/05-interviews.png" alt="Interview Calendar" width="800" />
+</p>
+
+### Capture locally
+
+```bash
+docker compose up -d
+pnpm db:seed
+pnpm dev
+# separate terminal:
+pnpm screenshots
+```
+
+Manual guide: [`docs/screenshots/README.md`](docs/screenshots/README.md)
 
 ## Installation
 
@@ -146,7 +168,7 @@ erDiagram
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/your-org/recruitflow-ai.git
+git clone https://github.com/Yokota110/recruitflow-ai.git
 cd recruitflow-ai
 pnpm install
 ```
