@@ -1,13 +1,14 @@
 import { diskStorage, memoryStorage } from 'multer';
 import { existsSync, mkdirSync } from 'fs';
 import { extname, join } from 'path';
-import { tmpdir } from 'os';
 
 const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-function isServerlessRuntime() {
-  return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+function isLocalDev() {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) return false;
+  if (process.cwd().startsWith('/var/task')) return false;
+  return process.env.NODE_ENV !== 'production';
 }
 
 function uniqueFilename(originalname: string) {
@@ -32,7 +33,7 @@ export function createMulterOptions() {
     cb(null, ALLOWED_EXTENSIONS.includes(ext));
   };
 
-  if (isServerlessRuntime()) {
+  if (!isLocalDev()) {
     return {
       storage: memoryStorage(),
       limits: { fileSize: MAX_FILE_SIZE },
