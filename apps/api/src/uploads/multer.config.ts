@@ -6,9 +6,7 @@ const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 function isLocalDev() {
-  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) return false;
-  if (process.cwd().startsWith('/var/task')) return false;
-  return process.env.NODE_ENV !== 'production';
+  return process.env.NODE_ENV === 'development' && !process.env.VERCEL;
 }
 
 function uniqueFilename(originalname: string) {

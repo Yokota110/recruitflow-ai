@@ -1,3 +1,6 @@
 {
-  "installCommand": "cd ../.. && pnpm install && pnpm --filter @recruitflow/shared build && pnpm --filter @recruitflow/api exec prisma generate"
+  "framework": null,
+  "installCommand": "cd ../.. && pnpm install && pnpm --filter @recruitflow/shared build && pnpm --filter @recruitflow/api exec prisma generate",
+  "buildCommand": "pnpm build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
 }
