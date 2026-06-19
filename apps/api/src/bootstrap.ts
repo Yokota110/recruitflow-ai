@@ -2,7 +2,8 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import express, { Express } from 'express';
+import * as express from 'express';
+import { Express } from 'express';
 import { AppModule } from './app.module';
 
 export async function createNestApp(): Promise<{ app: INestApplication; expressApp: Express }> {
