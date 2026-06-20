@@ -1,0 +1,11 @@
+{
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @recruitflow/shared build && pnpm --filter @recruitflow/api exec prisma generate && pnpm --filter @recruitflow/api build",
+  "outputDirectory": "apps/api/public",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/**"
+    }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+}

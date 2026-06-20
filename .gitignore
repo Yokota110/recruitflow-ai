@@ -2,9 +2,14 @@ node_modules
 .next
 dist
 .turbo
+.vercel
+.vercel-deploy-api
+.vercel-deploy-web*
 .env
 .env.local
+.env.*.local
 *.log
+*.tsbuildinfo
 # Runtime upload storage (not source module)
 apps/api/uploads/
 .DS_Store
