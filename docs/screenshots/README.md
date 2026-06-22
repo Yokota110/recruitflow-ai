@@ -1,34 +1,34 @@
 # Screenshots
 
-GitHub README용 스크린샷을 이 폴더에 저장합니다.
+Store GitHub README screenshots in this folder.
 
-## 권장 파일명
+## Recommended Files
 
-| 파일 | 페이지 | URL |
-|------|--------|-----|
+| File | Page | URL |
+|------|------|-----|
 | `01-dashboard.png` | Executive Dashboard | `/` |
-| `02-ai-intelligence.png` | AI Match Score & Insights | `/candidates/[id]` (높은 match score 후보) |
+| `02-ai-intelligence.png` | AI Match Score & Insights | `/candidates/[id]` (candidate with a high match score) |
 | `03-job-details.png` | Job Metrics & Pipeline Trend | `/jobs/[id]` |
 | `04-pipeline.png` | Kanban Pipeline | `/pipeline` |
 | `05-interviews.png` | Interview Calendar | `/interviews` |
 | `06-analytics.png` | Recruiter Analytics | `/analytics` |
 
-## 자동 캡처
+## Automated Capture
 
 ```bash
-# 1. Docker + DB + 시드
+# 1. Start Docker, the database, and seed data.
 docker compose up -d
 pnpm db:seed
 pnpm dev
 
-# 2. 다른 터미널에서
+# 2. In another terminal, capture screenshots.
 pnpm screenshots
 ```
 
-## 수동 캡처 팁
+## Manual Capture Tips
 
-- **해상도**: 1440×900 또는 1280×800 (GitHub README에 잘 맞음)
-- **로그인**: `demo@recruitflow.ai` / `demo1234`
-- **AI 패널**: Candidates 목록에서 match %가 높은(녹색) 후보 선택
-- **알림 벨**: 대시보드에서 unread 알림이 보이도록 캡처
-- **브라우저**: Chrome DevTools → `Ctrl+Shift+P` → "Capture full size screenshot"
+- **Resolution**: 1440x900 or 1280x800 works well in the GitHub README.
+- **Login**: `demo@recruitflow.ai` / `demo1234`.
+- **AI panel**: Pick a candidate with a high green match percentage from the Candidates list.
+- **Notification bell**: Capture the dashboard with unread notifications visible.
+- **Browser**: In Chrome DevTools, run `Ctrl+Shift+P`, then choose "Capture full size screenshot".
