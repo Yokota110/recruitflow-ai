@@ -180,6 +180,7 @@ docker compose up -d
 ```
 
 PostgreSQL runs on port **5436** (mapped to avoid conflicts with local installations).
+Use this port in `DATABASE_URL`; the default PostgreSQL port `5432` will not reach the compose database.
 
 ### 3. Configure environment
 
@@ -289,5 +290,4 @@ pnpm dev
 ## License
 
 MIT — portfolio demonstration project.
-
 
