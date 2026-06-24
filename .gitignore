@@ -15,3 +15,8 @@ dist
 apps/api/uploads/
 .DS_Store
 coverage
+
+# Local transcription artifacts
+transcription_*.wav
+transcription_*.srt
+ggml-*.bin
