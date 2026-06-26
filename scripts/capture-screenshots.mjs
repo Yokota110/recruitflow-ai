@@ -70,7 +70,7 @@ async function capture(page, name, url, { fullPage = true, delay = 800 } = {}) {
   await page.waitForTimeout(delay);
   const file = path.join(OUT_DIR, name);
   await page.screenshot({ path: file, fullPage });
-  console.log(`  ✓ ${name}`);
+  console.log(`  OK ${name}`);
 }
 
 async function main() {
